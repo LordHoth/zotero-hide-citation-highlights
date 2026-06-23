@@ -1,0 +1,80 @@
+name: Release
+
+# Push a tag like `v1.0.0` (matching the version in manifest.json) to build the
+# .xpi, generate updates.json, and publish a GitHub release.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  XPI_NAME: zotero-hide-citation-highlights.xpi
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version and verify it matches manifest
+        id: meta
+        run: |
+          tag_version="${GITHUB_REF_NAME#v}"
+          manifest_version="$(jq -r '.version' manifest.json)"
+          if [ "$tag_version" != "$manifest_version" ]; then
+            echo "::error::Tag v$tag_version does not match manifest.json version $manifest_version. Bump manifest.json first."
+            exit 1
+          fi
+          {
+            echo "version=$tag_version"
+            echo "id=$(jq -r '.applications.zotero.id' manifest.json)"
+            echo "min=$(jq -r '.applications.zotero.strict_min_version' manifest.json)"
+            echo "max=$(jq -r '.applications.zotero.strict_max_version' manifest.json)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build .xpi
+        run: zip -j -X "$XPI_NAME" manifest.json bootstrap.js
+
+      - name: Generate updates.json
+        run: |
+          cat > updates.json <<EOF
+          {
+            "addons": {
+              "${{ steps.meta.outputs.id }}": {
+                "updates": [
+                  {
+                    "version": "${{ steps.meta.outputs.version }}",
+                    "update_link": "https://github.com/${{ github.repository }}/releases/download/${GITHUB_REF_NAME}/${XPI_NAME}",
+                    "applications": {
+                      "gecko": {
+                        "strict_min_version": "${{ steps.meta.outputs.min }}",
+                        "strict_max_version": "${{ steps.meta.outputs.max }}"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+          EOF
+
+      - name: Publish versioned release (the .xpi)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          files: ${{ env.XPI_NAME }}
+          generate_release_notes: true
+
+      # Zotero's auto-update reads the manifest's update_url, which points at a
+      # stable "release" tag. Refresh that release's updates.json each version.
+      - name: Refresh update manifest pointer
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: release
+          name: Update manifest (Zotero auto-update)
+          files: updates.json
+          body: "Stable pointer Zotero reads to auto-update this plugin. Updated automatically on each version release."
