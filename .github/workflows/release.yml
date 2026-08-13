@@ -68,6 +68,7 @@ jobs:
           name: ${{ github.ref_name }}
           files: ${{ env.XPI_NAME }}
           generate_release_notes: true
+          make_latest: "true"
 
       # Zotero's auto-update reads the manifest's update_url, which points at a
       # stable "release" tag. Refresh that release's updates.json each version.
@@ -78,3 +79,7 @@ jobs:
           name: Update manifest (Zotero auto-update)
           files: updates.json
           body: "Stable pointer Zotero reads to auto-update this plugin. Updated automatically on each version release."
+          # Keep this housekeeping release out of /releases/latest so users
+          # always land on the versioned release that carries the .xpi.
+          prerelease: true
+          make_latest: "false"
