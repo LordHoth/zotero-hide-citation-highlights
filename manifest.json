@@ -7,7 +7,7 @@
   "applications": {
     "zotero": {
       "id": "hide-citation-highlights@jkroes",
-      "update_url": "https://github.com/jkroes/zotero-hide-citation-highlights/releases/download/release/updates.json",
+      "update_url": "https://github.com/LordHoth/zotero-hide-citation-highlights/releases/download/release/updates.json",
       "strict_min_version": "7.0",
       "strict_max_version": "12.0.*"
     }

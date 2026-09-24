@@ -5,14 +5,15 @@ Removes the light-blue boxes the Zotero PDF reader paints over detected
 citations a LaTeX `hyperref` document typically embeds. Links stay fully
 clickable and their hover popups still work; only the painted box disappears.
 
-Verified on Zotero 10.0.3 and Zotero 9.0.4. A single build covers both: the
-reader internals moved in Zotero 10, so the plugin probes for either shape at
-runtime (see below).
+Verified on Zotero 10.0.3. A single build also covers Zotero 7–9: the reader
+internals moved in Zotero 10, so the plugin probes for either shape at runtime
+(see below). The Zotero 7–9 path is tested against mocks of that reader; the
+previous release was verified on Zotero 9.0.4.
 
 ## Install
 
 Download `zotero-hide-citation-highlights.xpi` from the
-[latest release](https://github.com/jkroes/zotero-hide-citation-highlights/releases/latest),
+[latest release](https://github.com/LordHoth/zotero-hide-citation-highlights/releases/latest),
 then in Zotero: **Tools → Plugins → gear icon → Install Plugin From File…** and
 pick the `.xpi`. No restart needed; the boxes clear within ~1 second. Zotero
 auto-updates the plugin from later releases.
