@@ -38,6 +38,8 @@ jobs:
       - name: Build .xpi
         run: zip -j -X "$XPI_NAME" manifest.json bootstrap.js
 
+      # Zotero's AddonUpdateChecker skips any update entry without an
+      # "applications.zotero" block ("gecko" alone is ignored).
       - name: Generate updates.json
         run: |
           cat > updates.json <<EOF
@@ -49,7 +51,7 @@ jobs:
                     "version": "${{ steps.meta.outputs.version }}",
                     "update_link": "https://github.com/${{ github.repository }}/releases/download/${GITHUB_REF_NAME}/${XPI_NAME}",
                     "applications": {
-                      "gecko": {
+                      "zotero": {
                         "strict_min_version": "${{ steps.meta.outputs.min }}",
                         "strict_max_version": "${{ steps.meta.outputs.max }}"
                       }
